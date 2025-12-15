@@ -1,0 +1,16 @@
+네, 맞습니다. `application-test.properties` 파일에도 민감한 정보와 관련된 내용이 있으며, 이전 보고서에서 해당 내용을 다루었습니다. 좀 더 명확하게 다시 정리해 드리겠습니다.
+
+**`application-test.properties` 파일의 민감한 정보 관련 내용:**
+
+1.  **명시적인 하드코딩된 기본값**:
+    *   `spring.datasource.username`의 기본값으로 **`guest`** 가 설정되어 있습니다. 이 `guest`는 테스트 환경을 위한 특정 사용자 이름으로 의도된 설정이며, `README.md`에도 언급되어 있습니다.
+    *   `spring.datasource.password`는 기본값이 없으며, `DB_PASSWORD` 환경 변수에만 전적으로 의존합니다. 이는 비밀번호를 안전하게 관리하는 좋은 방식입니다.
+
+2.  **암묵적으로 사용되는 민감한 정보 (환경 변수가 설정되지 않은 경우)**:
+    *   `application-test.properties` 파일에는 `app.jwt.secret`이 명시적으로 정의되어 있지 않습니다. Spring Boot의 속성 로딩 우선순위에 따라, 이 경우 **`application.properties`에 정의된 `JWT_SECRET`의 기본값(`qLiO/tMLfTwT1wryNiCiHzh36W0L6j5covRI1/cUiOI=`)을 암묵적으로 사용**하게 됩니다. 즉, `JWT_SECRET` 환경 변수가 설정되지 않으면 테스트 환경에서도 이 하드코딩된 시크릿이 JWT 인증에 사용됩니다.
+
+**결론:**
+
+`application-test.properties` 파일 자체에는 `guest`라는 기본 사용자 이름이 명시적으로 포함되어 있습니다. 그리고 `JWT_SECRET` 환경 변수가 설정되지 않았을 경우에는 `application.properties`에 있는 하드코딩된 JWT 시크릿이 암묵적으로 사용됩니다.
+
+이러한 기본값이나 암묵적 사용은 개발 및 테스트 편의를 위한 것이지만, 실제 운영 환경에서는 모든 민감한 정보(사용자 이름, 비밀번호, 시크릿 키 등)를 `.env` 파일과 같은 환경 변수를 통해서만 제공하고 코드 내 기본값을 제거하는 것이 가장 안전하고 좋은 보안 관행입니다. `README.md`에서 `.env` 파일 사용을 강조하는 이유도 바로 이 때문입니다.

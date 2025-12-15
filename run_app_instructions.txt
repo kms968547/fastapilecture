@@ -1,0 +1,17 @@
+애플리케이션을 실행하려면 `application.properties` 파일에 정의된 데이터베이스 설정이 필요합니다. 현재 오류 메시지 `Access denied for user 'guest'@'localhost'`는 메인 애플리케이션이 'guest' 사용자로 `localhost:3306`에 연결을 시도하면서 권한 문제가 발생했음을 나타냅니다.
+
+이는 테스트를 실행할 때 `application-test.properties`가 활성화되어 `localhost:3307`에 `guest` 사용자로 연결하는 반면, 메인 애플리케이션은 기본적으로 `application.properties`의 설정을 사용하려고 하기 때문에 발생합니다. `application.properties`에서는 `DB_USERNAME`이 설정되지 않은 경우 기본값이 'root'이지만, 사용자의 셸 환경 변수에 'guest'가 남아있다면 메인 애플리케이션도 'guest'로 연결을 시도할 수 있습니다. 하지만 'guest' 사용자에게 `localhost:3306`에 대한 권한이 없으므로 오류가 발생합니다.
+
+해결 방법은 다음과 같습니다. 메인 애플리케이션도 테스트와 동일한 SSH 터널링된 데이터베이스(로컬 3307 포트)를 사용하도록 **"test" 프로필을 활성화하여 애플리케이션을 실행**하는 것입니다.
+
+다음 명령어를 사용하여 애플리케이션을 실행해 보세요.
+
+```bash
+java -jar -Dspring.profiles.active=test target/webservice-0.0.1-SNAPSHOT.jar
+```
+
+**중요 사항:**
+*   **SSH 터널이 활성화되어 있어야 합니다.** (MySQL 3306 -> 로컬 3307)
+*   셸에서 `DB_USERNAME` 환경 변수가 `guest`로, `DB_PASSWORD`가 Jcloud MySQL 서버의 `guest` 사용자 비밀번호로 **올바르게 설정되어 있어야 합니다.** (테스트 시 설정했던 것과 동일)
+
+이 명령으로 애플리케이션이 성공적으로 시작되는지 확인해 주십시오.
